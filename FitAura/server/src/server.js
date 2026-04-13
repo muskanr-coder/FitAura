@@ -1,17 +1,14 @@
-import dotenv from "dotenv";
-import app from "./app.js";
-import { connectDB } from "./config/db.js";
+import cors from "cors";
 
-dotenv.config();
+app.use(cors({
+  origin: "https://fit-aura-8spm.vercel.app",  // <-- yahan apna Vercel domain
+  credentials: true
+}));
 
-const PORT = process.env.PORT || 5000;
+app.use(express.json());
 
-const startServer = async () => {
-  await connectDB();
+import userRoutes from "./routes/userRoutes.js";
+app.use("/api/users", userRoutes);
 
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-};
-
-startServer();
+import productRoutes from "./routes/productRoutes.js";
+app.use("/api/products", productRoutes);

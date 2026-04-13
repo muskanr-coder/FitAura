@@ -1,17 +1,22 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://fitaura-pv1i.onrender.com";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "https://fitaura-pv1i.onrender.com/api"; // 👈 /api add kiya
 
 const api = axios.create({
-  baseURL: API_BASE_URL
+  baseURL: API_BASE_URL,
+  withCredentials: true
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
+// Products
 export const productAPI = {
   getProducts: async (params) => {
     const { data } = await api.get("/products", { params });
@@ -23,6 +28,7 @@ export const productAPI = {
   }
 };
 
+// Users (Auth)
 export const userAPI = {
   register: async (payload) => {
     const { data } = await api.post("/users/register", payload);
@@ -34,6 +40,7 @@ export const userAPI = {
   }
 };
 
+// Cart
 export const cartAPI = {
   getCart: async () => {
     const { data } = await api.get("/cart");
@@ -53,6 +60,7 @@ export const cartAPI = {
   }
 };
 
+// Wishlist
 export const wishlistAPI = {
   getWishlist: async () => {
     const { data } = await api.get("/wishlist");
