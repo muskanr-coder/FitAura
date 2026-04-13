@@ -1,8 +1,3 @@
-import dotenv from "dotenv";
-import app from "./app.js";
-import { connectDB } from "./config/db.js";
-
-dotenv.config();
-await connectDB();
-
-export default app;
+export default function handler(req, res) {
+  res.status(200).json({ message: "API working" });
+}
