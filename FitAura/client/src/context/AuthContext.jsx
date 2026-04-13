@@ -6,8 +6,14 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem("user");
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      return null;
+    }
   });
   const [loading, setLoading] = useState(false);
 
@@ -20,12 +26,17 @@ export const AuthProvider = ({ children }) => {
   const login = async (payload) => {
     setLoading(true);
     try {
-      const data = await userAPI.login(payload);
+      const data = await userAPI.login({
+        email: payload.email.trim().toLowerCase(),
+        password: payload.password.trim()
+      });
       saveAuth(data);
       toast.success("Welcome back!");
       return true;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      toast.error(
+        error.response?.data?.message || error.message || "Login failed"
+      );
       return false;
     } finally {
       setLoading(false);
@@ -35,12 +46,18 @@ export const AuthProvider = ({ children }) => {
   const register = async (payload) => {
     setLoading(true);
     try {
-      const data = await userAPI.register(payload);
+      const data = await userAPI.register({
+        name: payload.name.trim(),
+        email: payload.email.trim().toLowerCase(),
+        password: payload.password.trim()
+      });
       saveAuth(data);
       toast.success("Account created");
       return true;
     } catch (error) {
-      toast.error(error.response?.data?.message || "Registration failed");
+      toast.error(
+        error.response?.data?.message || error.message || "Registration failed"
+      );
       return false;
     } finally {
       setLoading(false);

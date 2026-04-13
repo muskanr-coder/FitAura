@@ -46,6 +46,10 @@ export const cartAPI = {
   removeFromCart: async (productId) => {
     const { data } = await api.delete(`/cart/${productId}`);
     return data;
+  },
+  clearCart: async () => {
+    const { data } = await api.delete("/cart");
+    return data;
   }
 };
 

@@ -1,10 +1,52 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useCart } from "../context/CartContext";
 
 const CartPage = () => {
-  const { cart, subtotal, removeItem } = useCart();
+  const { cart, subtotal, removeItem, clearCart, loading } = useCart();
+  const [customerInfo, setCustomerInfo] = useState({
+    name: "",
+    address: "",
+    mobileNumber: "",
+    pincode: ""
+  });
   const shipping = subtotal > 120 ? 0 : 8;
   const total = subtotal + shipping;
+
+  const handleCheckout = async () => {
+    const normalizedName = customerInfo.name.trim();
+    const normalizedAddress = customerInfo.address.trim();
+    const normalizedMobileNumber = customerInfo.mobileNumber.trim();
+    const normalizedPincode = customerInfo.pincode.trim();
+
+    if (!normalizedName || !normalizedAddress || !normalizedMobileNumber || !normalizedPincode) {
+      toast.error("Please fill in all delivery details");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(normalizedMobileNumber)) {
+      toast.error("Enter a valid 10-digit mobile number");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(normalizedPincode)) {
+      toast.error("Enter a valid 6-digit pincode");
+      return;
+    }
+
+    const ok = await clearCart();
+
+    if (ok) {
+      setCustomerInfo({
+        name: "",
+        address: "",
+        mobileNumber: "",
+        pincode: ""
+      });
+      toast.success("Order placed successfully");
+    }
+  };
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
@@ -59,7 +101,60 @@ const CartPage = () => {
                 <span>₹{total.toFixed(2)}</span>
               </div>
             </div>
-            <button className="btn-primary mt-5 w-full">Checkout</button>
+
+            <div className="mt-6 space-y-3">
+              <p className="text-sm font-semibold text-ink dark:text-white">Delivery Details</p>
+              <input
+                type="text"
+                value={customerInfo.name}
+                onChange={(e) => setCustomerInfo((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Full Name"
+                className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-ink dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-white"
+              />
+              <textarea
+                rows="3"
+                value={customerInfo.address}
+                onChange={(e) => setCustomerInfo((prev) => ({ ...prev, address: e.target.value }))}
+                placeholder="Address"
+                className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-ink dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-white"
+              />
+              <input
+                type="tel"
+                inputMode="numeric"
+                maxLength="10"
+                value={customerInfo.mobileNumber}
+                onChange={(e) =>
+                  setCustomerInfo((prev) => ({
+                    ...prev,
+                    mobileNumber: e.target.value.replace(/\D/g, "").slice(0, 10)
+                  }))
+                }
+                placeholder="Mobile Number"
+                className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-ink dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-white"
+              />
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength="6"
+                value={customerInfo.pincode}
+                onChange={(e) =>
+                  setCustomerInfo((prev) => ({
+                    ...prev,
+                    pincode: e.target.value.replace(/\D/g, "").slice(0, 6)
+                  }))
+                }
+                placeholder="Pincode"
+                className="w-full rounded-2xl border border-zinc-200 px-4 py-3 text-sm outline-none transition focus:border-ink dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:border-white"
+              />
+            </div>
+
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="btn-primary mt-5 w-full"
+            >
+              {loading ? "Processing..." : "Checkout"}
+            </button>
           </aside>
         </section>
       )}

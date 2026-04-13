@@ -6,7 +6,7 @@ const LoginPage = () => {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectPath = location.state?.from || "/";
+  const redirectPath = location.state?.from?.pathname || location.state?.from || "/";
   const [form, setForm] = useState({ email: "", password: "" });
 
   const onSubmit = async (e) => {

@@ -1,5 +1,7 @@
 import Product from "../models/Product.js";
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const getProducts = async (req, res) => {
   try {
     const { category, search, minPrice, maxPrice, sort, featured } = req.query;
@@ -8,7 +10,21 @@ export const getProducts = async (req, res) => {
 
     if (category && category !== "All") query.category = category;
     if (featured) query.featured = featured === "true";
-    if (search) query.name = { $regex: search, $options: "i" };
+    if (search?.trim()) {
+      const searchTerms = search
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(escapeRegex);
+
+      query.$or = searchTerms.flatMap((term) => [
+        { name: { $regex: term, $options: "i" } },
+        { brand: { $regex: term, $options: "i" } },
+        { description: { $regex: term, $options: "i" } },
+        { category: { $regex: term, $options: "i" } },
+        { colors: { $elemMatch: { $regex: term, $options: "i" } } }
+      ]);
+    }
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);

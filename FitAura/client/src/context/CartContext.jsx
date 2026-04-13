@@ -51,6 +51,20 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const clearCart = async () => {
+    setLoading(true);
+    try {
+      const data = await cartAPI.clearCart();
+      setCart(data);
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Could not clear cart");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const subtotal = cart.items?.reduce((sum, item) => {
     const unit = item.product?.discountPrice || item.product?.price || 0;
     return sum + unit * item.quantity;
@@ -64,6 +78,7 @@ export const CartProvider = ({ children }) => {
       subtotal,
       addItem,
       removeItem,
+      clearCart,
       refreshCart
     }),
     [cart, loading, subtotal]

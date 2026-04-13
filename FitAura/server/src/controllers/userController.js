@@ -7,15 +7,22 @@ const generateToken = (user) =>
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const normalizedName = name?.trim();
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedPassword = password?.trim();
 
-    if (!name || !email || !password) {
+    if (!normalizedName || !normalizedEmail || !normalizedPassword) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) return res.status(409).json({ message: "User already exists" });
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name: normalizedName,
+      email: normalizedEmail,
+      password: normalizedPassword
+    });
 
     return res.status(201).json({
       token: generateToken(user),
@@ -29,15 +36,17 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+    const normalizedPassword = password?.trim();
 
-    if (!email || !password) {
+    if (!normalizedEmail || !normalizedPassword) {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.comparePassword(normalizedPassword);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
     return res.json({

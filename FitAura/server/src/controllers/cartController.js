@@ -55,3 +55,18 @@ export const removeFromCart = async (req, res) => {
     return res.status(500).json({ message: "Failed to remove item", error: error.message });
   }
 };
+
+export const clearCart = async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ user: req.user.id });
+
+    if (!cart) return res.json({ user: req.user.id, items: [] });
+
+    cart.items = [];
+    await cart.save();
+
+    return res.json({ ...cart.toObject(), items: [] });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to clear cart", error: error.message });
+  }
+};

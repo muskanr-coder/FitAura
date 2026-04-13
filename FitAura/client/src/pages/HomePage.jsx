@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import FashionSlideshow from "../components/FashionSlideshow";
 import HeroSection from "../components/HeroSection";
 import ProductCard from "../components/ProductCard";
 import SkeletonCard from "../components/SkeletonCard";
@@ -24,6 +25,7 @@ const HomePage = () => {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
       <HeroSection />
+      <FashionSlideshow />
 
       <section className="mt-16">
         <div className="mb-6 flex items-end justify-between">
