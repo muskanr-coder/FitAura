@@ -9,9 +9,10 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 const app = express();
 
 const allowedOrigins = [
-  process.env.CLIENT_URL || "http://localhost:5173",
+  process.env.CLIENT_URL,
+  "http://localhost:5173",
   "http://127.0.0.1:5173"
-];
+].filter(Boolean);
 
 app.use(
   cors({
@@ -25,6 +26,9 @@ app.use(
     credentials: true
   })
 );
+
+app.options("*", cors());
+
 app.use(express.json());
 app.use(morgan("dev"));
 
